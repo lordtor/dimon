@@ -15,6 +15,7 @@ import {
   CTableBody,
   CTableRow,
   CTableHeaderCell,
+  CFormCheck,
 } from '@coreui/react'
 import {
   cilTrash,
@@ -31,6 +32,169 @@ import {
 import CIcon from '@coreui/icons-react'
 
 function NewTeam() {
+  const [repositoryType, setOptions] = useState([
+    {
+      key: 'Alpine Linux',
+      value: 'alpine',
+      isChecked: true,
+    },
+    {
+      key: 'Bower',
+      value: 'bower',
+      isChecked: false,
+    },
+    {
+      key: 'Cargo',
+      value: 'cargo',
+      isChecked: false,
+    },
+    {
+      key: 'Chef',
+      value: 'chef',
+      isChecked: false,
+    },
+    {
+      key: 'CocoaPods',
+      value: 'cocoapods',
+      isChecked: false,
+    },
+    {
+      key: 'Conan',
+      value: 'conan',
+      isChecked: false,
+    },
+    {
+      key: 'Conda',
+      value: 'conda',
+      isChecked: false,
+    },
+    {
+      key: 'CRAN',
+      value: 'cran',
+      isChecked: false,
+    },
+    {
+      key: 'Debian',
+      value: 'debian',
+      isChecked: false,
+    },
+    {
+      key: 'Docker',
+      value: 'docker',
+      isChecked: true,
+    },
+    {
+      key: 'Git LFS',
+      value: 'git',
+      isChecked: false,
+    },
+    {
+      key: 'Go Registry',
+      value: 'go',
+      isChecked: false,
+    },
+    {
+      key: 'Gradle',
+      value: 'gradle',
+      isChecked: false,
+    },
+    {
+      key: 'Helm',
+      value: 'helm',
+      isChecked: true,
+    },
+    {
+      key: 'Hugging Face',
+      value: 'hugging',
+      isChecked: false,
+    },
+    {
+      key: 'Maven',
+      value: 'maven',
+      isChecked: false,
+    },
+    {
+      key: 'npm',
+      value: 'npm',
+      isChecked: false,
+    },
+    {
+      key: 'NuGet',
+      value: 'nuget',
+      isChecked: false,
+    },
+    {
+      key: 'OCI',
+      value: 'oci',
+      isChecked: false,
+    },
+    {
+      key: 'Opkg',
+      value: 'opkg',
+      isChecked: false,
+    },
+    {
+      key: 'P2',
+      value: 'p2',
+      isChecked: false,
+    },
+    {
+      key: 'PHP Composer',
+      value: 'composer',
+      isChecked: false,
+    },
+    {
+      key: 'Pub Repositories',
+      value: 'pub',
+      isChecked: false,
+    },
+    {
+      key: 'Puppet',
+      value: 'puppet',
+      isChecked: false,
+    },
+    {
+      key: 'PyPI',
+      value: 'pypi',
+      isChecked: false,
+    },
+    {
+      key: 'RPM',
+      value: 'rpm',
+      isChecked: false,
+    },
+    {
+      key: 'RubyGems',
+      value: 'rubygems',
+      isChecked: false,
+    },
+    {
+      key: 'SBT',
+      value: 'sbt',
+      isChecked: false,
+    },
+    {
+      key: 'Swift',
+      value: 'swift',
+      isChecked: false,
+    },
+    {
+      key: 'Terraform',
+      value: 'terraform',
+      isChecked: false,
+    },
+    {
+      key: 'Vagrant',
+      value: 'vagrant',
+      isChecked: false,
+    },
+    {
+      key: 'VCS',
+      value: 'vcs',
+      isChecked: false,
+    },
+  ])
+
   const [formFields, setFormFields] = useState([
     { repo_pref: '', repo_url: '', repo_type: [], repo_user: '', repo_password: '' },
   ])
@@ -43,9 +207,9 @@ function NewTeam() {
     console.log(e.target.name)
     setFormStaticFields(data)
   }
-  const handleNoteChange = (e) => {
-    this.setState({ password: e.target.value })
-  }
+  // const handleNoteChange = (e) => {
+  //   this.setState({ password: e.target.value })
+  // }
   const handleFormChange = (event, index) => {
     let data = [...formFields]
     data[index][event.target.name] = event.target.value
@@ -84,6 +248,12 @@ function NewTeam() {
     data.splice(index, 1)
     setFormFields(data)
   }
+  const handleSelectItem = (event, option, index) => {
+    const values = [...repositoryType]
+    values[index].isChecked = event.target.checked
+    setOptions(values)
+  }
+
   return (
     <CRow>
       <CCol>
@@ -108,7 +278,6 @@ function NewTeam() {
                       aria-label="team_name"
                       aria-describedby="basic-addon1"
                       onChange={(event) => handleNameChange(event)}
-                      // value={form.team_name}
                     />
                     <CInputGroup>
                       <CInputGroupText>
@@ -119,20 +288,27 @@ function NewTeam() {
                         placeholder="Коментарий"
                         name="team_note"
                         onChange={(event) => handleNameChange(event)}
-                        // value={form.team_note}
                       ></CFormTextarea>
                     </CInputGroup>
                   </CInputGroup>
                 </CTableRow>
                 <CTableRow>
-                  <CFormCheck id="flexCheckChecked" label="Checked checkbox" defaultChecked />
-                  <CFormCheck id="flexCheckChecked" label="Checked checkbox" defaultChecked />
-                  <CFormCheck id="flexCheckChecked" label="Checked checkbox" defaultChecked />
-                  <CFormCheck id="flexCheckDefault" label="Default checkbox" />
-                  <CFormCheck id="flexCheckDefault" label="Default checkbox" />
-                  <CFormCheck id="flexCheckDefault" label="Default checkbox" />
-                  <CFormCheck id="flexCheckDefault" label="Default checkbox" />
-                  <CFormCheck id="flexCheckDefault" label="Default checkbox" />
+                  <CInputGroup className="mb-12">
+                    {repositoryType.map((role, index) => {
+                      return (
+                        <CFormCheck
+                          className="me-4"
+                          key={index}
+                          id={role.value}
+                          name={role.key}
+                          value={role.value}
+                          onChange={(event) => handleSelectItem(event, role, index)}
+                          label={role.key}
+                          checked={role.isChecked}
+                        />
+                      )
+                    })}
+                  </CInputGroup>
                 </CTableRow>
                 {formFields.map((form, index) => {
                   return (
