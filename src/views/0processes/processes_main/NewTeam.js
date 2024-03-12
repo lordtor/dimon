@@ -1,8 +1,7 @@
-import { useState, React } from 'react'
+import React, { useState } from 'react'
 import {
   CCard,
   CCardHeader,
-  CCol,
   CRow,
   CButton,
   CFormInput,
@@ -11,11 +10,9 @@ import {
   CButtonGroup,
   CFormSelect,
   CFormTextarea,
-  CTable,
-  CTableBody,
-  CTableRow,
-  CTableHeaderCell,
   CFormCheck,
+  CContainer,
+  CForm,
 } from '@coreui/react'
 import {
   cilTrash,
@@ -221,7 +218,8 @@ function NewTeam() {
     data[index][e.target.name] = value
     setFormFields(data)
   }
-  const submit = (e) => {
+
+  const submit = async (e) => {
     e.preventDefault()
     let data_request = { remote: formFields, data: formStaticFields }
     // localStorage.setItem('data', JSON.stringify(formFields))
@@ -235,9 +233,23 @@ function NewTeam() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(static_result),
     }
-    fetch('http://localhost:8080/post', requestOptions)
-      .then((response) => response.json())
-      .then((data) => console.log(data.code))
+    const currentHost = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`
+    console.log(currentHost)
+    // render() {
+    //   return (
+    //     { this.state.loading ? <div><CSpinner /></div> : <div>{this.state.data.item.title}</div> }
+    //   )
+    try {
+      const response = await fetch(
+        `${window.location.protocol}//${window.location.hostname}:8080/post`,
+        requestOptions,
+      )
+      const json = await response.json()
+      // this.setState({ data: json })
+      console.log(json)
+    } catch (error) {
+      console.log(error)
+    }
   }
   const addFields = () => {
     let object = { repo_pref: '', repo_url: '', repo_type: [], repo_user: '', repo_password: '' }
@@ -255,158 +267,152 @@ function NewTeam() {
   }
 
   return (
-    <CRow>
-      <CCol>
-        <CCard className="mb-4">
-          <CCardHeader>
-            <strong>Новая команда</strong>
-          </CCardHeader>
-          <p className="text-medium-emphasis">
-            Процес по подготовке инфраструктуры для новой команды разработки.
-          </p>
-          <form onSubmit={submit}>
-            <CTable>
-              <CTableBody>
-                <CTableRow>
-                  <CInputGroup sm="auto">
-                    <CInputGroupText id="basic-addon1">
-                      <CIcon icon={cilPeople} className="me-2" />
+    <CContainer>
+      <CCard className="mb-4">
+        <CCardHeader className="mb-4">
+          <strong>Новая команда</strong>
+        </CCardHeader>
+        <p className="text-medium-emphasis">
+          Процес по подготовке инфраструктуры для новой команды разработки.
+        </p>
+      </CCard>
+      <CForm className="row gy-2 gx-3 align-items-center" onSubmit={submit}>
+        <CInputGroup>
+          <CInputGroup>
+            <CInputGroupText id="basic-addon1">
+              <CIcon icon={cilPeople} className="me-1" />
+            </CInputGroupText>
+            <CFormInput
+              placeholder="Имя команды"
+              name="team_name"
+              aria-label="team_name"
+              aria-describedby="basic-addon1"
+              onChange={(event) => handleNameChange(event)}
+            />
+          </CInputGroup>
+          <CRow>
+            <p>Внутренние репозитории:</p>
+          </CRow>
+          <CRow>
+            <CInputGroup>
+              {repositoryType.map((role, index) => {
+                return (
+                  <CFormCheck
+                    className="me-4"
+                    key={index}
+                    id={role.value}
+                    name={role.key}
+                    value={role.value}
+                    onChange={(event) => handleSelectItem(event, role, index)}
+                    label={role.key}
+                    checked={role.isChecked}
+                  />
+                )
+              })}
+            </CInputGroup>
+          </CRow>
+          <CRow>
+            <br />
+            <p>Вешние репозитории (*возможно потребуется ожидать получения сетевого доступа)</p>
+            <br />
+          </CRow>
+          {formFields.map((form, index) => {
+            return (
+              <CInputGroup key={index}>
+                <CRow>
+                  <CInputGroup>
+                    <CInputGroupText>
+                      <CIcon icon={cilMenu} />
+                    </CInputGroupText>
+                    <CFormSelect
+                      aria-label="Default select example"
+                      name="repo_type"
+                      placeholder="Выберите тип репозитория"
+                      onChange={(event) => handleChange(event, index)}
+                    >
+                      <option>Выберите тип репозитория</option>
+                      {repositoryType.map((role, index) => {
+                        return (
+                          <option value={role.value} key={index}>
+                            {role.key}
+                          </option>
+                        )
+                      })}
+                    </CFormSelect>
+                    <CInputGroupText id="repo-pref">
+                      <CIcon icon={cilAsterisk} />
                     </CInputGroupText>
                     <CFormInput
-                      placeholder="Имя команды"
-                      name="team_name"
-                      aria-label="team_name"
-                      aria-describedby="basic-addon1"
-                      onChange={(event) => handleNameChange(event)}
+                      name="repo_pref"
+                      placeholder="Префикс"
+                      onChange={(event) => handleFormChange(event, index)}
+                      value={form.repo_pref}
                     />
-                    <CInputGroup>
-                      <CInputGroupText>
-                        <CIcon icon={cilColorBorder} className="me-2" />
-                      </CInputGroupText>
-                      <CFormTextarea
-                        aria-label="With textarea"
-                        placeholder="Коментарий"
-                        name="team_note"
-                        onChange={(event) => handleNameChange(event)}
-                      ></CFormTextarea>
-                    </CInputGroup>
+                    <CInputGroupText id="repo-url">
+                      <CIcon icon={cilLink} />
+                    </CInputGroupText>
+                    <CFormInput
+                      name="repo_url"
+                      placeholder="Ссылка на репозиторий"
+                      onChange={(event) => handleFormChange(event, index)}
+                      value={form.repo_url}
+                    />
+                    <CInputGroupText id="repo-user">
+                      <CIcon icon={cilUser} />
+                    </CInputGroupText>
+                    <CFormInput
+                      name="repo_user"
+                      placeholder="Имя пользователя"
+                      onChange={(event) => handleFormChange(event, index)}
+                      value={form.repo_user}
+                    />
+                    <CInputGroupText id="repo-password">
+                      <CIcon icon={cilHttps} />
+                    </CInputGroupText>
+                    <CFormInput
+                      name="repo_password"
+                      placeholder="Пароль пользователя"
+                      onChange={(event) => handleFormChange(event, index)}
+                      value={form.repo_password}
+                      type="password"
+                    />
                   </CInputGroup>
-                </CTableRow>
-                <CTableRow>
-                  <CInputGroup className="mb-12">
-                    {repositoryType.map((role, index) => {
-                      return (
-                        <CFormCheck
-                          className="me-4"
-                          key={index}
-                          id={role.value}
-                          name={role.key}
-                          value={role.value}
-                          onChange={(event) => handleSelectItem(event, role, index)}
-                          label={role.key}
-                          checked={role.isChecked}
-                        />
-                      )
-                    })}
-                  </CInputGroup>
-                </CTableRow>
-                {formFields.map((form, index) => {
-                  return (
-                    // <div key={index}>
-                    <CTableRow key={index}>
-                      <CTableHeaderCell scope="row">
-                        <CInputGroup className="mb-12">
-                          <CInputGroupText id="repo-pref">
-                            <CIcon icon={cilAsterisk} className="me-2" />
-                          </CInputGroupText>
-                          <CFormInput
-                            name="repo_pref"
-                            placeholder="Префикс"
-                            onChange={(event) => handleFormChange(event, index)}
-                            value={form.repo_pref}
-                          />
-                          <CInputGroupText>
-                            <CIcon icon={cilMenu} className="me-2" />
-                          </CInputGroupText>
-                          <CFormSelect
-                            size="lg"
-                            aria-label="Default select example"
-                            name="repo_type"
-                            placeholder="Выберите тип репозитория"
-                            onChange={(event) => handleChange(event, index)}
-                          >
-                            <option>Выберите тип репозитория</option>
-                            <option value="Maven">Maven</option>
-                            <option value="Npm">Npm</option>
-                            <option value="Go">Go</option>
-                            <option value="PHP">PHP</option>
-                            <option value="File">File</option>
-                          </CFormSelect>
-                          <CInputGroup className="mb-2">
-                            <CInputGroupText id="repo-url">
-                              <CIcon icon={cilLink} className="me-2" />
-                            </CInputGroupText>
-                            <CFormInput
-                              name="repo_url"
-                              placeholder="Ссылка на репозиторий"
-                              onChange={(event) => handleFormChange(event, index)}
-                              value={form.repo_url}
-                            />
-                          </CInputGroup>
-                        </CInputGroup>
-                        <CInputGroup className="mb-12">
-                          <CInputGroupText id="repo-user">
-                            <CIcon icon={cilUser} className="me-2" />
-                          </CInputGroupText>
-                          <CFormInput
-                            name="repo_user"
-                            placeholder="Имя пользователя"
-                            onChange={(event) => handleFormChange(event, index)}
-                            value={form.repo_user}
-                          />
-                          <CInputGroupText id="repo-password">
-                            <CIcon icon={cilHttps} className="me-2" />
-                          </CInputGroupText>
-                          <CFormInput
-                            name="repo_password"
-                            placeholder="Пароль пользователя"
-                            onChange={(event) => handleFormChange(event, index)}
-                            value={form.repo_password}
-                            type="password"
-                          />
-                        </CInputGroup>
-                      </CTableHeaderCell>
-                      <CTableHeaderCell scope="row">
-                        <CButton
-                          className="me-2"
-                          shape="rounded-pill"
-                          color="danger"
-                          onClick={() => removeFields(index)}
-                        >
-                          <CIcon icon={cilTrash} className="me-2" />
-                          Удалить
-                        </CButton>
-                      </CTableHeaderCell>
-                    </CTableRow>
-                  )
-                })}
-              </CTableBody>
-            </CTable>
-          </form>
-          <p></p>
-          <CButtonGroup role="group" aria-label="Basic example">
-            <CButton className="me-2" color="info" onClick={addFields}>
-              <CIcon icon={cilLibraryAdd} className="me-2" />
-              Добавить..
-            </CButton>
-            <CButton className="me-2" color="warning" onClick={submit}>
-              <CIcon icon={cilCheckAlt} className="me-2" />
-              Создать запрос
-            </CButton>
-          </CButtonGroup>
-        </CCard>
-      </CCol>
-    </CRow>
+                </CRow>
+                <CRow>
+                  <CButtonGroup>
+                    <CButton sm="1" color="danger" onClick={() => removeFields(index)}>
+                      <CIcon icon={cilTrash} />
+                      Удалить
+                    </CButton>
+                    <CButton sm="1" color="info" onClick={addFields}>
+                      <CIcon icon={cilLibraryAdd} className="me-2" />
+                      Добавить репозиторий..
+                    </CButton>
+                  </CButtonGroup>
+                </CRow>
+              </CInputGroup>
+            )
+          })}
+          <CInputGroup>
+            <CInputGroupText>
+              <CIcon icon={cilColorBorder} className="me-2" />
+            </CInputGroupText>
+            <CFormTextarea
+              aria-label="With textarea"
+              placeholder="Коментарий"
+              name="team_note"
+              onChange={(event) => handleNameChange(event)}
+            ></CFormTextarea>
+          </CInputGroup>
+        </CInputGroup>
+      </CForm>
+      <CButtonGroup role="group" aria-label="Basic example">
+        <CButton className="me-2" color="warning" onClick={submit}>
+          <CIcon icon={cilCheckAlt} className="me-2" />
+          Создать запрос
+        </CButton>
+      </CButtonGroup>
+    </CContainer>
   )
 }
 
