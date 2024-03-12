@@ -5,6 +5,7 @@ import (
 	"net/http"
     "fmt"
     "io"
+    "time"
 
 )
 
@@ -28,7 +29,7 @@ func main() {
         if err != nil {
             fmt.Println(err)
         }
-        
+        time.Sleep(30 * time.Second)
         fmt.Println(string(jsonData))
         c.JSON(http.StatusOK, gin.H{ 
             "code" : http.StatusOK, 
